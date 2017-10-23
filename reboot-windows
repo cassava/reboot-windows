@@ -1,0 +1,19 @@
+#!/bin/sh
+# Reboot into the windows found by the EFI boot manager.
+
+set -e
+
+if [[ $(id -u) -ne 0 ]]; then
+    echo "Error: require root privileges." >&2
+    exit 1
+fi
+
+bootid=$(efibootmgr | sed -rn 's/^Boot([0-9]{4}).*Windows Boot Manager$/\1/p')
+if [[ -z $bootid ]]; then
+    echo "Error: cannot find boot ID for Windows Boot Manager" >&2
+    exit 1
+fi
+
+efibootmgr --bootnext $bootid
+exec reboot
+
